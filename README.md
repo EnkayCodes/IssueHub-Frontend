@@ -1,4 +1,24 @@
-# Getting Started with Create React App
+# Issue Tracker Frontend
+
+React frontend for the Issue Tracking System, connected to Django REST API.
+
+## Features
+
+- User authentication and authorization
+- Dashboard with statistics
+- Kanban board for issue management
+- Issue creation and editing
+- Comment system
+- User profile management
+- Admin panel for user management
+- Responsive design
+
+## Setup
+
+1. Install dependencies:
+```bash npm install ```
+
+## Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
