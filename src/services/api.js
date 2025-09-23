@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/constants';
 
+// Axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -8,12 +9,15 @@ const api = axios.create({
   },
 });
 
-// Add auth token to requests
+// Attach auth token if exists
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`; // Note: Django often uses "Bearer" not "Token"
+      // ✅ If you're using JWT
+      config.headers.Authorization = `Token ${token}`;
+      // ❌ If using DRF TokenAuth, switch to:
+      // config.headers.Authorization = `Token ${token}`;
     }
     return config;
   },
@@ -33,23 +37,25 @@ api.interceptors.response.use(
   }
 );
 
-// Authentication API - CORRECTED ENDPOINTS
+// ====================== APIs ======================
+
+// Authentication API
 export const authAPI = {
-  login: (credentials) => api.post('/token/', credentials), // Changed from /auth/token/
-  refreshToken: (token) => api.post('/token/refresh/', { refresh: token }),
-  // Note: Your API might not have logout or profile endpoints
+  login: (credentials) => api.post('/auth/token/', credentials), // JWT login
+  refreshToken: (token) => api.post('/auth/token/refresh/', { refresh: token }),
 };
 
-// Employee API - CORRECTED ENDPOINTS
+// Employee API
 export const employeeAPI = {
+  register: (data) => api.post('/register_employee/', data), // ✅ matches your Django view
+  getCurrent: () => api.get('/current_employee/'), // if you add it in backend
   getAll: () => api.get('/employees/'),
   getById: (id) => api.get(`/employees/${id}/`),
-  create: (data) => api.post('/employees/', data),
   update: (id, data) => api.patch(`/employees/${id}/`, data),
   delete: (id) => api.delete(`/employees/${id}/`),
 };
 
-// Issues API - CORRECTED ENDPOINTS
+// Issues API
 export const issuesAPI = {
   getAll: (params = {}) => api.get('/issues/', { params }),
   getById: (id) => api.get(`/issues/${id}/`),
@@ -58,6 +64,7 @@ export const issuesAPI = {
   delete: (id) => api.delete(`/issues/${id}/`),
 };
 
+// Comments API
 export const commentsAPI = {
   getByIssue: (issueId) => api.get(`/issues/${issueId}/comments/`),
   create: (issueId, data) => api.post(`/issues/${issueId}/comments/`, data),
@@ -65,6 +72,7 @@ export const commentsAPI = {
   delete: (commentId) => api.delete(`/comments/${commentId}/`),
 };
 
+// Activity API
 export const activityAPI = {
   getRecent: () => api.get('/activity/'),
 };

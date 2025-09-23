@@ -1,18 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
+import { authAPI } from '../services/api.js';  // axios wrapper for auth calls
 import '../styles/App.css';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
-    username: '',  // Change from email to username
+    username: '', // must be username unless backend allows email
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  
-  const { login } = useAuth();
+
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -24,20 +23,35 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  e.preventDefault();
+  setLoading(true);
+  setError('');
 
-    const result = await login(credentials);
-    
-    if (result.success) {
-      navigate('/dashboard');
-    } else {
-      setError(result.error);
-    }
-    
+  try {
+    const response = await authAPI.login({
+      username: credentials.username,
+      password: credentials.password,
+    });
+
+    console.log("🔎 Full login response:", response.data);
+
+    const { token } = response.data;
+    if (!token) throw new Error("No token returned from API");
+
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', credentials.username);
+
+    console.log('✅ Login successful, redirecting to dashboard...');
+    navigate('/dashboard');
+  } catch (err) {
+    console.error('❌ Login failed:', err.response?.data || err.message);
+    setError('Unable to log in with provided credentials.');
+  } finally {
     setLoading(false);
-  };
+  }
+};
+
+
 
   if (loading) return <LoadingSpinner />;
 
@@ -45,14 +59,14 @@ const Login = () => {
     <div className="login-container">
       <div className="login-form">
         <h1>Login to Issue Tracker</h1>
-        
+
         {error && <div className="error-message">{error}</div>}
-        
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label> {/* Change from Email to Username */}
+            <label htmlFor="username">Username</label>
             <input
-              type="text"  
+              type="text"
               id="username"
               name="username"
               value={credentials.username}
@@ -81,7 +95,7 @@ const Login = () => {
         </form>
 
         <p className="register-link">
-          Don't have an account? <Link to="/register">Register here</Link>
+          Don&apos;t have an account? <Link to="/register">Register here</Link>
         </p>
       </div>
     </div>
