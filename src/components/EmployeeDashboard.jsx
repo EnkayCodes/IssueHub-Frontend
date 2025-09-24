@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { issuesAPI, activityAPI } from '../services/api.js';
-import { useAuth } from '../contexts/AuthContext';
-import LoadingSpinner from './LoadingSpinner';
+import { useAuth } from '../contexts/AuthContext.jsx';
+import LoadingSpinner from './LoadingSpinner.jsx';
 import '../styles/App.css';
 
 const EmployeeDashboard = () => {
