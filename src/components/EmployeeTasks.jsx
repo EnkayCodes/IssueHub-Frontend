@@ -42,21 +42,30 @@ const EmployeeTasks = () => {
 
   const groupTasksByStatus = () => {
     const grouped = {};
-    STATUS_OPTIONS.forEach(status => {
-      grouped[status] = tasks.filter(task => task.status === status);
+    STATUS_OPTIONS.forEach(statusObj => {
+      // ✅ Use statusObj.value as the key and filter by value
+      grouped[statusObj.value] = tasks.filter(task => 
+        task.status?.value === statusObj.value || task.status === statusObj.value
+      );
     });
     return grouped;
   };
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (statusValue) => {
     const icons = {
-      'To Do': '📝',
-      'In Progress': '🚧',
-      'Review': '👀',
-      'Completed': '✅',
-      'Backlog': '📦'
+      'open': '📝',
+      'in-progress': '🚧',
+      'review': '👀',
+      'completed': '✅',
+      'backlog': '📦'
     };
-    return icons[status] || '●';
+    return icons[statusValue] || '●';
+  };
+
+  // Helper to get status label from value
+  const getStatusLabel = (statusValue) => {
+    const statusObj = STATUS_OPTIONS.find(opt => opt.value === statusValue);
+    return statusObj?.label || statusValue;
   };
 
   if (loading) return <LoadingSpinner message="Loading your tasks..." />;
@@ -72,40 +81,41 @@ const EmployeeTasks = () => {
       </div>
 
       <div className="tasks-board">
-        {STATUS_OPTIONS.map(status => (
-          <div key={status} className="status-column">
+        {STATUS_OPTIONS.map(statusObj => (
+          <div key={statusObj.value} className="status-column">
             <div className="column-header">
-              <span className="status-icon">{getStatusIcon(status)}</span>
-              <h3>{status}</h3>
-              <span className="task-count">({groupedTasks[status]?.length || 0})</span>
+              <span className="status-icon">{getStatusIcon(statusObj.value)}</span>
+              {/* ✅ FIXED: Render statusObj.label instead of the object */}
+              <h3>{statusObj.label}</h3>
+              <span className="task-count">({groupedTasks[statusObj.value]?.length || 0})</span>
             </div>
 
             <div className="tasks-list">
-              {groupedTasks[status]?.map(task => (
+              {groupedTasks[statusObj.value]?.map(task => (
                 <div key={task.id} className="task-card">
                   <Link to={`/issues/${task.id}`} className="task-title">
                     {task.title}
                   </Link>
                   
                   <div className="task-meta">
-                  
-                  <span className={`priority priority-${(task.priority?.value || task.priority).toLowerCase()}`}>
-                    {task.priority?.label || task.priority}
-                  </span>
-                  
+                    <span className={`priority priority-${(task.priority?.value || task.priority || 'medium').toLowerCase()}`}>
+                      {task.priority?.label || task.priority || 'Medium'}
+                    </span>
                     <span className="task-id">#{task.id}</span>
                   </div>
 
                   <div className="task-actions">
-                    {status !== 'Completed' && (
+                    {statusObj.value !== 'completed' && (
                       <select
-                        value={status}
+                        value={task.status?.value || task.status}
                         onChange={(e) => updateTaskStatus(task.id, e.target.value)}
                         disabled={updating === task.id}
                         className="status-select"
                       >
                         {STATUS_OPTIONS.map(opt => (
-                          <option key={opt} value={opt}>{opt}</option>
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
                         ))}
                       </select>
                     )}
@@ -122,9 +132,9 @@ const EmployeeTasks = () => {
                 </div>
               ))}
 
-              {(!groupedTasks[status] || groupedTasks[status].length === 0) && (
+              {(!groupedTasks[statusObj.value] || groupedTasks[statusObj.value].length === 0) && (
                 <div className="empty-state">
-                  No tasks in {status}
+                  No tasks in {statusObj.label}
                 </div>
               )}
             </div>

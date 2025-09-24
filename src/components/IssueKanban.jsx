@@ -22,7 +22,9 @@ const IssueKanban = () => {
       
       const grouped = {};
       STATUS_OPTIONS.forEach(status => {
-        grouped[status] = allIssues.filter(issue => issue.status?.label || issue.status === status);
+        grouped[status.value] = allIssues.filter(issue => 
+          issue.status?.value === status.value || issue.status === status.value
+        );
       });
       
       setIssues(grouped);
@@ -70,18 +72,18 @@ const IssueKanban = () => {
       <div className="kanban-container">
         {STATUS_OPTIONS.map(status => (
           <div 
-            key={status}
+            key={status.value}
             className="kanban-column"
             onDragOver={handleDragOver}
-            onDrop={(e) => handleDrop(e, status)}
+            onDrop={(e) => handleDrop(e, status.value)}
           >
             <div className="column-header">
-              <h3>{status}</h3>
-              <span className="issue-count">({issues[status]?.length || 0})</span>
+              <h3>{status.label}</h3>
+              <span className="issue-count">({issues[status.value]?.length || 0})</span>
             </div>
             
             <div className="issues-list">
-              {issues[status]?.map(issue => (
+              {issues[status.value]?.map(issue => (
                 <div
                   key={issue.id}
                   className="issue-card"
@@ -93,8 +95,9 @@ const IssueKanban = () => {
                   </Link>
                   
                   <div className="issue-meta">
-                    <span className={`priority-badge priority-${(issue.priority?.value || issue.priority).toLowerCase()}`}>
-                      {issue.priority?.label || issue.priority}
+                    {/* Fixed line 75: Removed problematic template literal syntax */}
+                    <span className={`priority-badge priority-${(issue.priority?.value || issue.priority || 'medium').toLowerCase()}`}>
+                      {issue.priority?.label || issue.priority || 'Medium'}
                     </span>
                     {issue.assignee_name && (
                       <span className="assignee">👤 {issue.assignee_name}</span>
@@ -105,9 +108,9 @@ const IssueKanban = () => {
                 </div>
               ))}
               
-              {(!issues[status] || issues[status].length === 0) && (
+              {(!issues[status.value] || issues[status.value].length === 0) && (
                 <div className="empty-column">
-                  No issues in {status}
+                  No issues in {status.label}
                 </div>
               )}
             </div>

@@ -1,141 +1,101 @@
-import React, { useState, useEffect } from 'react';
+// src/components/EmployeeDashboard.jsx
+import React, { useEffect, useState } from 'react';
+import { issuesAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
-import { issuesAPI, activityAPI } from '../services/api.js';
-import { useAuth } from '../contexts/AuthContext.jsx';
-import LoadingSpinner from './LoadingSpinner.jsx';
-import '../styles/App.css';
 
 const EmployeeDashboard = () => {
   const { user } = useAuth();
-  const [stats, setStats] = useState({
-    total: 0,
-    inProgress: 0,
-    completed: 0,
-    assigned: 0
-  });
-  const [recentActivity, setRecentActivity] = useState([]);
-  const [myTasks, setMyTasks] = useState([]);
+  const [issues, setIssues] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDashboardData();
-  }, []);
+    const fetchIssues = async () => {
+      try {
+        const res = await issuesAPI.getAll({ assigned_to: user.id });
+        setIssues(res.data);
+      } catch (err) {
+        console.error('Error fetching issues:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    if (user) fetchIssues();
+  }, [user]);
 
-  const fetchDashboardData = async () => {
-    try {
-      setLoading(true);
-      const [statsResponse, activityResponse, tasksResponse] = await Promise.all([
-        issuesAPI.getStats(),
-        activityAPI.getRecent(),
-        issuesAPI.getAll({ assignee: user.id })
-      ]);
-
-      setStats(statsResponse.data);
-      setRecentActivity(activityResponse.data);
-      setMyTasks(tasksResponse.data.slice(0, 5)); // Show only 5 recent tasks
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+  const statusCounts = {
+    'Not Started': issues.filter((i) => i.status === 'Not Started').length,
+    'In Progress': issues.filter((i) => i.status === 'In Progress').length,
+    'Completed': issues.filter((i) => i.status === 'Completed').length,
   };
 
-  if (loading) return <LoadingSpinner message="Loading dashboard..." />;
+  if (loading) return <p className="text-center mt-10">Loading dashboard...</p>;
 
   return (
-    <div className="dashboard">
-      <div className="dashboard-header">
-        <h1>Welcome back, {user.name}!</h1>
-        <Link to="/issue/create" className="create-issue-btn">
-          + Create New Issue
-        </Link>
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">My Dashboard</h1>
+
+      {/* Status Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {Object.entries(statusCounts).map(([status, count]) => (
+          <div
+            key={status}
+            className="bg-white p-6 rounded-xl shadow hover:shadow-lg transition text-center"
+          >
+            <h3 className="font-semibold text-gray-700">{status}</h3>
+            <p className="text-2xl font-bold text-teal-600">{count}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <div className="stat-icon">📊</div>
-          <div className="stat-info">
-            <h3>Total Issues</h3>
-            <p className="stat-number">{stats.total}</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">🚧</div>
-          <div className="stat-info">
-            <h3>In Progress</h3>
-            <p className="stat-number">{stats.inProgress}</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">✅</div>
-          <div className="stat-info">
-            <h3>Completed</h3>
-            <p className="stat-number">{stats.completed}</p>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon">👤</div>
-          <div className="stat-info">
-            <h3>Assigned to Me</h3>
-            <p className="stat-number">{stats.assigned}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="dashboard-content">
-        <div className="dashboard-section">
-          <h2>My Recent Tasks</h2>
-          <div className="tasks-list">
-            {myTasks.length === 0 ? (
-              <p>No tasks assigned to you.</p>
-            ) : (
-              myTasks.map(task => (
-                <div key={task.id} className="task-item">
-                  <div className="task-main">
-                    <Link to={`/issues/${task.id}`} className="task-title">
-                      {task.title}
+      {/* Issue Table */}
+      <h2 className="text-xl font-bold mb-4">Assigned Issues</h2>
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border rounded-xl shadow">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="border p-3 text-left">Title</th>
+              <th className="border p-3 text-left">Status</th>
+              <th className="border p-3 text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {issues.length > 0 ? (
+              issues.map((issue) => (
+                <tr key={issue.id} className="hover:bg-gray-50">
+                  <td className="border p-3">{issue.title}</td>
+                  <td className="border p-3">
+                    <span
+                      className={`px-2 py-1 rounded text-sm font-semibold ${
+                        issue.status === 'Completed'
+                          ? 'bg-green-100 text-green-700'
+                          : issue.status === 'In Progress'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}
+                    >
+                      {issue.status}
+                    </span>
+                  </td>
+                  <td className="border p-3">
+                    <Link
+                      to={`/issue/${issue.id}`}
+                      className="text-teal-600 hover:underline"
+                    >
+                      View
                     </Link>
-                    <span className={`priority-badge priority-${(task.priority?.value || task.priority).toLowerCase()}`}>
-                      {task.priority?.label || task.priority}
-                    </span>
-                  </div>
-                  <div className="task-meta">
-                    <span className={`status status-${(task.status?.value || task.status).toLowerCase().replace(' ', '-')}`}>
-                      {task.status?.label || task.status}
-                    </span>
-                    <span>Updated {new Date(task.updated_at).toLocaleDateString()}</span>
-                  </div>
-                </div>
+                  </td>
+                </tr>
               ))
-            )}
-          </div>
-          {myTasks.length > 0 && (
-            <Link to="/my-tasks" className="view-all-link">View all tasks →</Link>
-          )}
-        </div>
-
-        <div className="dashboard-section">
-          <h2>Recent Activity</h2>
-          <div className="activity-list">
-            {recentActivity.length === 0 ? (
-              <p>No recent activity.</p>
             ) : (
-              recentActivity.map(activity => (
-                <div key={activity.id} className="activity-item">
-                  <div className="activity-content">
-                    <strong>{activity.user_name}</strong> {activity.action}
-                  </div>
-                  <div className="activity-time">
-                    {new Date(activity.timestamp).toLocaleString()}
-                  </div>
-                </div>
-              ))
+              <tr>
+                <td colSpan="3" className="p-4 text-center text-gray-500">
+                  No issues assigned to you yet.
+                </td>
+              </tr>
             )}
-          </div>
-        </div>
+          </tbody>
+        </table>
       </div>
     </div>
   );
