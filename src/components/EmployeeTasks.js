@@ -88,9 +88,11 @@ const EmployeeTasks = () => {
                   </Link>
                   
                   <div className="task-meta">
-                    <span className={`priority priority-${task.priority.toLowerCase()}`}>
-                      {task.priority}
-                    </span>
+                  
+                  <span className={`priority priority-${(task.priority?.value || task.priority).toLowerCase()}`}>
+                    {task.priority?.label || task.priority}
+                  </span>
+                  
                     <span className="task-id">#{task.id}</span>
                   </div>
 

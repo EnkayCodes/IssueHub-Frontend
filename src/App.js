@@ -48,25 +48,25 @@ const AppRoutes = () => {
             </ProtectedRoute>
           } />
           
-          <Route path="/issues" element={
+          <Route path="/issue" element={
             <ProtectedRoute>
               <IssueKanban />
             </ProtectedRoute>
           } />
           
-          <Route path="/issues/create" element={
+          <Route path="/issue/create" element={
             <ProtectedRoute>
               <IssueForm />
             </ProtectedRoute>
           } />
           
-          <Route path="/issues/edit/:id" element={
+          <Route path="/issue/edit/:id" element={
             <ProtectedRoute>
               <IssueForm editMode={true} />
             </ProtectedRoute>
           } />
           
-          <Route path="/issues/:id" element={
+          <Route path="/issue/:id" element={
             <ProtectedRoute>
               <IssueDetail />
             </ProtectedRoute>
@@ -93,6 +93,18 @@ const AppRoutes = () => {
       </div>
     </>
   );
+};
+
+// Temporary debug helper
+const originalConsoleError = console.error;
+console.error = (...args) => {
+  if (args[0] && typeof args[0] === 'string' && args[0].includes('Objects are not valid as a React child')) {
+    console.group('🎯 OBJECT RENDERING ERROR DETECTED');
+    console.log('Error message:', args[0]);
+    console.trace('Stack trace:');
+    console.groupEnd();
+  }
+  originalConsoleError.apply(console, args);
 };
 
 function App() {

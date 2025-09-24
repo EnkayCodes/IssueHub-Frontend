@@ -1,17 +1,18 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import { authAPI } from '../services/api.js';  // axios wrapper for auth calls
 import '../styles/App.css';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
-    username: '', // must be username unless backend allows email
+    username: '',
     password: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -23,48 +24,33 @@ const Login = () => {
   };
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  setError('');
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-  try {
-    const response = await authAPI.login({
-      username: credentials.username,
-      password: credentials.password,
-    });
-
-    console.log("🔎 Full login response:", response.data);
-
-    const { token } = response.data;
-    if (!token) throw new Error("No token returned from API");
-
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', credentials.username);
-
-    console.log('✅ Login successful, redirecting to dashboard...');
-    navigate('/dashboard');
-  } catch (err) {
-    console.error('❌ Login failed:', err.response?.data || err.message);
-    setError('Unable to log in with provided credentials.');
-  } finally {
+    const result = await login(credentials);
+    
+    if (result.success) {
+      navigate('/dashboard', { replace: true });
+    } else {
+      setError(result.error || 'Login failed. Please check your credentials.');
+    }
+    
     setLoading(false);
-  }
-};
+  };
 
-
-
-  if (loading) return <LoadingSpinner />;
+  if (loading) return <LoadingSpinner message="Logging in..." />;
 
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1>Login to Issue Tracker</h1>
-
+        <h1>Login to IssueHub</h1>
+        
         {error && <div className="error-message">{error}</div>}
-
+        
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="username">Username</label>
+            <label htmlFor="username">Username *</label>
             <input
               type="text"
               id="username"
@@ -77,7 +63,7 @@ const Login = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password">Password *</label>
             <input
               type="password"
               id="password"
@@ -89,13 +75,13 @@ const Login = () => {
             />
           </div>
 
-          <button type="submit" disabled={loading}>
+          <button type="submit" disabled={loading} className="primary-btn">
             {loading ? 'Logging in...' : 'Login'}
           </button>
         </form>
 
         <p className="register-link">
-          Don&apos;t have an account? <Link to="/register">Register here</Link>
+          Don't have an account? <Link to="/register">Register here</Link>
         </p>
       </div>
     </div>

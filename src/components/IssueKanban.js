@@ -22,7 +22,7 @@ const IssueKanban = () => {
       
       const grouped = {};
       STATUS_OPTIONS.forEach(status => {
-        grouped[status] = allIssues.filter(issue => issue.status === status);
+        grouped[status] = allIssues.filter(issue => issue.status?.label || issue.status === status);
       });
       
       setIssues(grouped);
@@ -93,8 +93,8 @@ const IssueKanban = () => {
                   </Link>
                   
                   <div className="issue-meta">
-                    <span className={`priority-badge priority-${issue.priority.toLowerCase()}`}>
-                      {issue.priority}
+                    <span className={`priority-badge priority-${(issue.priority?.value || issue.priority).toLowerCase()}`}>
+                      {issue.priority?.label || issue.priority}
                     </span>
                     {issue.assignee_name && (
                       <span className="assignee">👤 {issue.assignee_name}</span>

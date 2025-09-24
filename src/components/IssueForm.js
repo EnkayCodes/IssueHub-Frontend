@@ -54,8 +54,8 @@ const IssueForm = ({ editMode = false }) => {
       setFormData({
         title: issue.title,
         description: issue.description,
-        status: issue.status,
-        priority: issue.priority,
+        status: issue.status?.label || issue.status,
+        priority: issue.priority?.label || issue.priority,
         assignee: issue.assignee,
         tags: issue.tags || []
       });
@@ -81,6 +81,8 @@ const IssueForm = ({ editMode = false }) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
+
+    
 
     try {
       if (editMode) {
@@ -147,7 +149,9 @@ const IssueForm = ({ editMode = false }) => {
               onChange={handleChange}
             >
               {STATUS_OPTIONS.map(status => (
-                <option key={status} value={status}>{status}</option>
+                <option key={status.value} value={status.value}>
+                  {status.label}
+                </option>
               ))}
             </select>
           </div>
@@ -161,7 +165,9 @@ const IssueForm = ({ editMode = false }) => {
               onChange={handleChange}
             >
               {PRIORITY_OPTIONS.map(priority => (
-                <option key={priority} value={priority}>{priority}</option>
+                <option key={priority.value} value={priority.value}>
+                  {priority.label}
+                </option>
               ))}
             </select>
           </div>
@@ -200,7 +206,7 @@ const IssueForm = ({ editMode = false }) => {
         <div className="form-actions">
           <button 
             type="button" 
-            onClick={() => navigate('/issues')}
+            onClick={() => navigate('/issue')}
             disabled={submitting}
           >
             Cancel

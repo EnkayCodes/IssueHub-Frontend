@@ -1,28 +1,25 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { employeeAPI } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/App.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    // User fields
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
     first_name: '',
     last_name: '',
-    
-    // Employee fields
     department: '',
     position: '',
-    phone_number: ''
+    phone_number: '' // Added phone_number field
   });
-  
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useAuth();
 
   const handleChange = (e) => {
     setFormData({
@@ -51,26 +48,39 @@ const Register = () => {
     }
 
     try {
-      // Prepare data for Django API
+      // Structure data to match your Django serializer's nested structure
       const registrationData = {
-        username: formData.username,
-        email: formData.email,
+        username: formData.username.trim(),
         password: formData.password,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        department: formData.department,
-        position: formData.position,
-        phone_number: formData.phone_number
+        email: formData.email.trim(),
+        first_name: formData.first_name.trim(),
+        last_name: formData.last_name.trim(),
+        department: formData.department.trim(),
+        position: formData.position.trim(),
+        phone_number: formData.phone_number.trim()
+    
       };
 
-      const response = await employeeAPI.register(registrationData);
-
-      if (response.status === 201) {
+      const result = await register(registrationData);
+      
+      if (result.success) {
         alert('Registration successful! Please login with your credentials.');
         navigate('/login');
+      } else {
+        // Handle Django validation errors
+        if (typeof result.error === 'object') {
+          // If it's an object with field errors
+          const errorMessages = [];
+          for (const [field, messages] of Object.entries(result.error)) {
+            errorMessages.push(`${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`);
+          }
+          setError(errorMessages.join(' | '));
+        } else {
+          setError(result.error);
+        }
       }
     } catch (error) {
-      setError(error.response?.data?.error || 'Registration failed. Please try again.');
+      setError('Registration failed. Please try again.');
       console.error('Registration error:', error);
     } finally {
       setLoading(false);
@@ -82,33 +92,33 @@ const Register = () => {
   return (
     <div className="login-container">
       <div className="login-form">
-        <h1>Employee Registration</h1>
+        <h1>Create Account</h1>
         
         {error && <div className="error-message">{error}</div>}
         
         <form onSubmit={handleSubmit}>
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="first_name">First Name *</label>
+              <label htmlFor="first_name">First Name</label>
               <input
                 type="text"
                 id="first_name"
                 name="first_name"
                 value={formData.first_name}
                 onChange={handleChange}
-                required
+                placeholder="Enter your first name"
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="last_name">Last Name *</label>
+              <label htmlFor="last_name">Last Name</label>
               <input
                 type="text"
                 id="last_name"
                 name="last_name"
                 value={formData.last_name}
                 onChange={handleChange}
-                required
+                placeholder="Enter your last name"
               />
             </div>
           </div>
@@ -122,18 +132,19 @@ const Register = () => {
               value={formData.username}
               onChange={handleChange}
               required
+              placeholder="Choose a username"
             />
           </div>
 
           <div className="form-group">
-            <label htmlFor="email">Email Address *</label>
+            <label htmlFor="email">Email Address</label>
             <input
               type="email"
               id="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              required
+              placeholder="Enter your email"
             />
           </div>
 
@@ -158,7 +169,7 @@ const Register = () => {
                 name="position"
                 value={formData.position}
                 onChange={handleChange}
-                placeholder="e.g., Software Developer"
+                placeholder="e.g., Developer"
               />
             </div>
           </div>
@@ -171,6 +182,7 @@ const Register = () => {
               name="phone_number"
               value={formData.phone_number}
               onChange={handleChange}
+              placeholder="Enter your phone number"
             />
           </div>
 
@@ -184,6 +196,7 @@ const Register = () => {
               onChange={handleChange}
               required
               minLength="6"
+              placeholder="Enter password (min. 6 characters)"
             />
           </div>
 
@@ -196,11 +209,12 @@ const Register = () => {
               value={formData.confirmPassword}
               onChange={handleChange}
               required
+              placeholder="Confirm your password"
             />
           </div>
 
-          <button type="submit" disabled={loading} className="primary">
-            {loading ? 'Creating Account...' : 'Register as Employee'}
+          <button type="submit" disabled={loading} className="primary-btn">
+            {loading ? 'Creating Account...' : 'Register'}
           </button>
         </form>
 

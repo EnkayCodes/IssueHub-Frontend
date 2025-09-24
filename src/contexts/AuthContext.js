@@ -1,5 +1,5 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, employeeAPI } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -17,101 +17,117 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('access_token');
     const savedUser = localStorage.getItem('user');
     
-    if (token) {
-      verifyToken();
-    } else {
-      setLoading(false);
+    // Fix: Safely parse user data with error handling
+    let parsedUser = null;
+    if (savedUser) {
+      try {
+        parsedUser = JSON.parse(savedUser);
+      } catch (error) {
+        console.warn('Invalid user data in localStorage, clearing...');
+        localStorage.removeItem('user');
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+      }
     }
+    
+    if (token && parsedUser) {
+      setUser(parsedUser);
+    }
+    setLoading(false);
   }, []);
 
-  const verifyToken = async () => {
+  const login = async (credentials) => {
     try {
-      const response = await authAPI.getProfile();
-      setEmployee(response.data);
-      setUser(response.data.user); // Assuming your employee serializer includes user data
+      console.log('🔐 Attempting login with:', credentials);
+      
+      // Step 1: Get JWT token
+      const response = await authAPI.login(credentials);
+      console.log('✅ Login response:', response.data);
+      
+      const { access, refresh } = response.data;
+      
+      // Save tokens
+      localStorage.setItem('access_token', access);
+      localStorage.setItem('refresh_token', refresh);
+      
+      // Step 2: Try to get profile
+      let userData = null;
+      try {
+        const profileResponse = await employeeAPI.getProfile();
+        userData = profileResponse.data;
+        console.log('📊 Profile data received');
+      } catch (profileError) {
+        console.warn('Profile endpoint not available, using basic info');
+        // Create basic user info
+        userData = {
+          user: {
+            username: credentials.username,
+            is_staff: true,
+            is_superuser: true,
+            first_name: credentials.username,
+            last_name: ''
+          }
+        };
+      }
+      
+      // Step 3: Set user state properly
+      const userToSave = userData.user || userData;
+      
+      // Fix: Ensure we're saving valid JSON
+      setUser(userToSave);
+      localStorage.setItem('user', JSON.stringify(userToSave)); // This must be JSON
+      
+      console.log('✅ Login successful');
+      return { success: true };
+      
     } catch (error) {
-      localStorage.removeItem('token');
-      setUser(null);
-      setEmployee(null);
-    } finally {
-      setLoading(false);
+      console.error('❌ Login error:', error.response?.data || error.message);
+      
+      // Clear invalid data
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      localStorage.removeItem('user');
+      
+      return { 
+        success: false, 
+        error: error.response?.data?.detail || 'Login failed. Please check your credentials.' 
+      };
     }
   };
 
-  const login = async (credentials) => {
-  try {
-    // Step 1: Get authentication token
-    const response = await authAPI.login(credentials);
-    
-    if (!response.data.token) {
-      return { success: false, error: 'No token received' };
-    }
-    
-    const token = response.data.token;
-    localStorage.setItem('token', token);
-    
-    // Step 2: Try to get user profile, but if it fails, create basic user info
-    let userData = null;
-    
+  const register = async (userData) => {
     try {
-      const profileResponse = await authAPI.getProfile();
-      userData = profileResponse.data;
-    } catch (profileError) {
-      console.warn('Profile endpoint not available, using basic info');
-      // Create basic user info from login credentials
-      userData = {
-        user: {
-          username: credentials.username,
-          is_staff: true,
-          is_superuser: true,
-          first_name: 'Admin',
-          last_name: 'User'
-        }
+      const response = await authAPI.register(userData);
+      return { success: true, data: response.data };
+    } catch (error) {
+      console.error('Registration error:', error.response?.data);
+      return { 
+        success: false, 
+        error: error.response?.data?.error || 'Registration failed' 
       };
     }
-    
-    // Set user state
-    if (userData.user) {
-      setUser(userData.user);
-      setEmployee(userData);
-    } else {
-      setUser(userData);
-    }
-    
-    return { success: true };
-    
-  } catch (error) {
-    console.error('Login error details:', error.response?.data);
-    return { 
-      success: false, 
-      error: error.response?.data?.detail || error.response?.data?.non_field_errors?.[0] || 'Login failed' 
-    };
-  }
-};
+  };
 
-  const logout = async () => {
-    try {
-      await authAPI.logout();
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      localStorage.removeItem('token');
-      setUser(null);
-      setEmployee(null);
-    }
+  const logout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    localStorage.removeItem('user');
+    setUser(null);
+    setEmployee(null);
   };
 
   const value = {
     user,
     employee,
     login,
+    register,
     logout,
     loading,
     isAuthenticated: !!user,
-    isAdmin: user?.is_staff || false
+    isAdmin: user?.is_staff || user?.is_superuser || false
   };
 
   return (

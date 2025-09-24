@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { issuesAPI, activityAPI } from '../services/api';
+import { issuesAPI, activityAPI } from '../services/api.js';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import '../styles/App.css';
@@ -46,7 +46,7 @@ const EmployeeDashboard = () => {
     <div className="dashboard">
       <div className="dashboard-header">
         <h1>Welcome back, {user.name}!</h1>
-        <Link to="/issues/create" className="create-issue-btn">
+        <Link to="/issue/create" className="create-issue-btn">
           + Create New Issue
         </Link>
       </div>
@@ -98,13 +98,13 @@ const EmployeeDashboard = () => {
                     <Link to={`/issues/${task.id}`} className="task-title">
                       {task.title}
                     </Link>
-                    <span className={`priority-badge priority-${task.priority.toLowerCase()}`}>
-                      {task.priority}
+                    <span className={`priority-badge priority-${(task.priority?.value || task.priority).toLowerCase()}`}>
+                      {task.priority?.label || task.priority}
                     </span>
                   </div>
                   <div className="task-meta">
-                    <span className={`status status-${task.status.toLowerCase().replace(' ', '-')}`}>
-                      {task.status}
+                    <span className={`status status-${(task.status?.value || task.status).toLowerCase().replace(' ', '-')}`}>
+                      {task.status?.label || task.status}
                     </span>
                     <span>Updated {new Date(task.updated_at).toLocaleDateString()}</span>
                   </div>

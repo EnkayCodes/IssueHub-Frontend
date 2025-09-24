@@ -73,7 +73,7 @@ const IssueDetail = () => {
   return (
     <div className="issue-detail">
       <div className="issue-header">
-        <button onClick={() => navigate('/issues')} className="back-button">
+        <button onClick={() => navigate('/issue')} className="back-button">
           ← Back to Issues
         </button>
         <h1>{issue.title}</h1>
@@ -85,9 +85,9 @@ const IssueDetail = () => {
           <div className="meta-item">
             <label>Status:</label>
             <select 
-              value={issue.status} 
+              value={issue.status?.label || issue.status} 
               onChange={(e) => handleStatusChange(e.target.value)}
-              className={`status-${issue.status.toLowerCase().replace(' ', '-')}`}
+              className={`status-${(issue.status?.value || issue.status).toLowerCase().replace(' ', '-')}`}
             >
               <option value="To Do">To Do</option>
               <option value="In Progress">In Progress</option>
@@ -99,8 +99,8 @@ const IssueDetail = () => {
           
           <div className="meta-item">
             <label>Priority:</label>
-            <span className={`priority-${issue.priority.toLowerCase()}`}>
-              {issue.priority}
+            <span className={`priority-${(issue.priority?.value || issue.priority).toLowerCase()}`}>
+              {issue.priority?.label || issue.priority}
             </span>
           </div>
           
