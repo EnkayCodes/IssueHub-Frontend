@@ -101,7 +101,7 @@ const AppRoutes = () => {
           />
 
           <Route
-            path="/issue"
+            path="/issues"
             element={
               <ProtectedRoute>
                 <IssueKanban />

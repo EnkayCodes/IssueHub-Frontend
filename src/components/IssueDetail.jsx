@@ -24,13 +24,17 @@ const IssueDetail = () => {
   const fetchIssueData = async () => {
     try {
       setLoading(true);
-      const [issueResponse, commentsResponse] = await Promise.all([
-        issuesAPI.getById(id),
-        commentsAPI.getByIssue(id)
-      ]);
-      
+      const issueResponse = await issuesAPI.getById(id);
       setIssue(issueResponse.data);
-      setComments(commentsResponse.data);
+      
+      // Try to fetch comments, but handle if endpoint doesn't exist
+      try {
+        const commentsResponse = await commentsAPI.getByIssue(id);
+        setComments(commentsResponse.data);
+      } catch (commentError) {
+        console.log('Comments endpoint not available:', commentError);
+        setComments([]);
+      }
     } catch (error) {
       setError('Failed to fetch issue data');
       console.error('Error:', error);
@@ -70,10 +74,13 @@ const IssueDetail = () => {
   if (error) return <div className="error-container">{error}</div>;
   if (!issue) return <div>Issue not found</div>;
 
+  // Debug: Log the issue data to see what fields are available
+  console.log('Issue data:', issue);
+
   return (
     <div className="issue-detail">
       <div className="issue-header">
-        <button onClick={() => navigate('/issue')} className="back-button">
+        <button onClick={() => navigate('/issues')} className="back-button">
           ← Back to Issues
         </button>
         <h1>{issue.title}</h1>
@@ -85,46 +92,52 @@ const IssueDetail = () => {
           <div className="meta-item">
             <label>Status:</label>
             <select 
-              value={issue.status?.label || issue.status} 
+              value={issue.status} 
               onChange={(e) => handleStatusChange(e.target.value)}
-              className={`status-${(issue.status?.value || issue.status).toLowerCase().replace(' ', '-')}`}
+              className={`status-${issue.status.toLowerCase().replace(' ', '-')}`}
             >
-              <option value="To Do">To Do</option>
+              <option value="Open">Open</option>
               <option value="In Progress">In Progress</option>
-              <option value="Review">Review</option>
-              <option value="Completed">Completed</option>
-              <option value="Backlog">Backlog</option>
+              <option value="blocked">Blocked</option>
+              <option value="Resolved">Resolved</option>
             </select>
           </div>
           
           <div className="meta-item">
             <label>Priority:</label>
-            <span className={`priority-${(issue.priority?.value || issue.priority).toLowerCase()}`}>
-              {issue.priority?.label || issue.priority}
+            <span className={`priority-${issue.priority.toLowerCase()}`}>
+              {issue.priority}
             </span>
           </div>
           
           <div className="meta-item">
-            <label>Assignee:</label>
-            <span>{issue.assignee_name || 'Unassigned'}</span>
+            <label>Assigned To:</label>
+            <span>
+              {issue.assigned_to 
+                ? (issue.assigned_to.user?.first_name + ' ' + issue.assigned_to.user?.last_name) 
+                : 'Unassigned'}
+            </span>
           </div>
           
           <div className="meta-item">
-            <label>Reporter:</label>
-            <span>{issue.reporter_name}</span>
-          </div>
-          
-          <div className="meta-item">
-            <label>Created:</label>
-            <span>{new Date(issue.created_at).toLocaleDateString()}</span>
+            <label>Deadline:</label>
+            <span>
+              {issue.issue_deadline 
+                ? new Date(issue.issue_deadline).toLocaleDateString() 
+                : 'No deadline'}
+            </span>
           </div>
           
           <div className="meta-item">
             <label>Tags:</label>
             <div className="tags">
-              {issue.tags?.map(tag => (
-                <span key={tag} className="tag">{tag}</span>
-              ))}
+              {issue.tags && issue.tags.length > 0 ? (
+                issue.tags.map(tag => (
+                  <span key={tag} className="tag">{tag}</span>
+                ))
+              ) : (
+                <span>No tags</span>
+              )}
             </div>
           </div>
         </div>
@@ -133,23 +146,27 @@ const IssueDetail = () => {
       <div className="issue-content">
         <div className="description-section">
           <h2>Description</h2>
-          <p>{issue.description}</p>
+          <p>{issue.description || 'No description provided'}</p>
         </div>
 
         <div className="comments-section">
           <h2>Comments ({comments.length})</h2>
           
-          <div className="comments-list">
-            {comments.map(comment => (
-              <div key={comment.id} className="comment">
-                <div className="comment-header">
-                  <strong>{comment.author_name}</strong>
-                  <span>{new Date(comment.created_at).toLocaleString()}</span>
+          {comments.length > 0 ? (
+            <div className="comments-list">
+              {comments.map(comment => (
+                <div key={comment.id} className="comment">
+                  <div className="comment-header">
+                    <strong>{comment.author_name || 'Unknown User'}</strong>
+                    <span>{new Date(comment.created_at).toLocaleString()}</span>
+                  </div>
+                  <p>{comment.content}</p>
                 </div>
-                <p>{comment.content}</p>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p>No comments yet.</p>
+          )}
 
           <form onSubmit={handleCommentSubmit} className="comment-form">
             <textarea

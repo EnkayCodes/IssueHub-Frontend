@@ -12,7 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, isAdmin } = useAuth();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -28,15 +28,34 @@ const Login = () => {
     setLoading(true);
     setError('');
 
-    const result = await login(credentials);
-    
-    if (result.success) {
-      navigate('/dashboard', { replace: true });
-    } else {
-      setError(result.error || 'Login failed. Please check your credentials.');
+    try {
+      const result = await login(credentials);
+      
+      if (result.success) {
+        console.log('✅ Login successful, user data:', result.user);
+        console.log('👑 Is admin from result:', result.user?.is_staff || result.user?.is_superuser);
+        console.log('👑 Is admin from context:', isAdmin);
+        
+        // Use the user data from the login result for immediate redirect
+        const userIsAdmin = result.user?.is_staff || result.user?.is_superuser || isAdmin;
+        console.log('🔀 Redirect decision - Admin:', userIsAdmin);
+        
+        if (userIsAdmin) {
+          console.log('➡️ Redirecting to admin dashboard');
+          navigate('/admin/dashboard', { replace: true });
+        } else {
+          console.log('➡️ Redirecting to employee dashboard');
+          navigate('/dashboard', { replace: true });
+        }
+      } else {
+        setError(result.error || 'Login failed. Please check your credentials.');
+      }
+    } catch (error) {
+      setError('Login failed. Please try again.');
+      console.error('Login error:', error);
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   if (loading) return <LoadingSpinner message="Logging in..." />;

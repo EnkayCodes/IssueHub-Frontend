@@ -14,19 +14,20 @@ const IssueForm = ({ editMode = false }) => {
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: 'To Do',
-    priority: 'Medium',
-    assignee: '',
-    tags: []
+    status: 'Open', // Match Django default
+    priority: 'Low', // Match Django default
+    assigned_to: '', // Correct field name (not assignee)
+    issue_deadline: '', // Add this field
+    tags: [] // Optional field
   });
 
-  const [employees, setEmployees] = useState([]); // Change users to employees
+  const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    fetchEmployees(); // Change function name
+    fetchEmployees();
     if (editMode) {
       fetchIssue();
     } else {
@@ -34,10 +35,8 @@ const IssueForm = ({ editMode = false }) => {
     }
   }, [editMode, id]);
 
-
-  const fetchEmployees = async () => { // Change function name
+  const fetchEmployees = async () => {
     try {
-      // Use employeeAPI instead of usersAPI
       const response = await employeeAPI.getAll();
       setEmployees(response.data);
     } catch (error) {
@@ -53,10 +52,11 @@ const IssueForm = ({ editMode = false }) => {
       
       setFormData({
         title: issue.title,
-        description: issue.description,
-        status: issue.status?.label || issue.status,
-        priority: issue.priority?.label || issue.priority,
-        assignee: issue.assignee,
+        description: issue.description || '',
+        status: issue.status,
+        priority: issue.priority,
+        assigned_to: issue.assigned_to?.id || issue.assigned_to || '', // Use correct field name
+        issue_deadline: issue.issue_deadline || '',
         tags: issue.tags || []
       });
     } catch (error) {
@@ -77,23 +77,53 @@ const IssueForm = ({ editMode = false }) => {
     setFormData(prev => ({ ...prev, tags }));
   };
 
+  const handleDateTimeChange = (e) => {
+    setFormData(prev => ({ ...prev, issue_deadline: e.target.value }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSubmitting(true);
     setError('');
 
-    
-
     try {
+      // Prepare data to match EXACT Django model field names
+      const apiData = {
+        title: formData.title,
+        description: formData.description,
+        status: formData.status,
+        priority: formData.priority,
+        assigned_to: formData.assigned_to || null, // Correct field name
+        issue_deadline: formData.issue_deadline || null, // Add this field
+        tags: formData.tags
+      };
+
+      console.log('Sending data to API:', apiData);
+
       if (editMode) {
-        await issuesAPI.update(id, formData);
+        await issuesAPI.update(id, apiData);
       } else {
-        await issuesAPI.create(formData);
+        await issuesAPI.create(apiData);
       }
       navigate('/issues');
     } catch (error) {
-      setError(error.response?.data?.message || 'Failed to save issue');
-      console.error('Error:', error);
+      console.error('Full error details:', error);
+      console.error('Error response data:', error.response?.data);
+      
+      if (error.response?.data) {
+        // Handle Django REST framework validation errors
+        if (typeof error.response.data === 'object') {
+          const errorMessages = [];
+          for (const [field, messages] of Object.entries(error.response.data)) {
+            errorMessages.push(`${field}: ${Array.isArray(messages) ? messages.join(', ') : messages}`);
+          }
+          setError(`Validation errors: ${errorMessages.join('; ')}`);
+        } else {
+          setError(error.response.data.detail || 'Failed to save issue');
+        }
+      } else {
+        setError('Failed to save issue. Please check your connection.');
+      }
     } finally {
       setSubmitting(false);
     }
@@ -127,13 +157,12 @@ const IssueForm = ({ editMode = false }) => {
         </div>
 
         <div className="form-group">
-          <label htmlFor="description">Description *</label>
+          <label htmlFor="description">Description</label>
           <textarea
             id="description"
             name="description"
             value={formData.description}
             onChange={handleChange}
-            required
             rows="6"
             placeholder="Describe the issue in detail..."
           />
@@ -174,25 +203,36 @@ const IssueForm = ({ editMode = false }) => {
         </div>
 
         <div className="form-group">
-        <label htmlFor="assignee">Assignee</label>
-        <select
-          id="assignee"
-          name="assignee"
-          value={formData.assignee}
-          onChange={handleChange}
-        >
-          <option value="">Unassigned</option>
-          {employees.map(employee => ( // Change users to employees
-            <option key={employee.id} value={employee.id}>
-              {employee.user?.first_name} {employee.user?.last_name} {/* Adjust based on your API response */}
-            </option>
-          ))}
-        </select>
-      </div>
+          <label htmlFor="assigned_to">Assigned To *</label>
+          <select
+            id="assigned_to"
+            name="assigned_to"
+            value={formData.assigned_to}
+            onChange={handleChange}
+            required
+          >
+            <option value="">Select an employee</option>
+            {employees.map(employee => (
+              <option key={employee.id} value={employee.id}>
+                {employee.user?.first_name} {employee.user?.last_name}
+              </option>
+            ))}
+          </select>
+        </div>
 
-      
         <div className="form-group">
-          <label htmlFor="tags">Tags (comma-separated)</label>
+          <label htmlFor="issue_deadline">Deadline (Optional)</label>
+          <input
+            type="datetime-local"
+            id="issue_deadline"
+            name="issue_deadline"
+            value={formData.issue_deadline}
+            onChange={handleDateTimeChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="tags">Tags (comma-separated, optional)</label>
           <input
             type="text"
             id="tags"
@@ -206,7 +246,7 @@ const IssueForm = ({ editMode = false }) => {
         <div className="form-actions">
           <button 
             type="button" 
-            onClick={() => navigate('/issue')}
+            onClick={() => navigate('/issues')}
             disabled={submitting}
           >
             Cancel
