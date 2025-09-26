@@ -37,8 +37,13 @@ const Login = () => {
         console.log('👑 Is admin from context:', isAdmin);
         
         // Use the user data from the login result for immediate redirect
-        const userIsAdmin = result.user?.is_staff || result.user?.is_superuser || isAdmin;
+        const userIsAdmin =
+          result.isAdmin === true ||
+          result.user?.is_staff === true ||
+          result.user?.is_superuser === true;
+
         console.log('🔀 Redirect decision - Admin:', userIsAdmin);
+
         
         if (userIsAdmin) {
           console.log('➡️ Redirecting to admin dashboard');

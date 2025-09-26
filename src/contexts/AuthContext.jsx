@@ -48,38 +48,33 @@ export const AuthProvider = ({ children }) => {
   try {
     setLoading(true);
 
-    // Step 1: Get tokens
+    // Step 1: Get tokens + user data directly from backend
     const response = await authAPI.login(credentials);
-    const { access, refresh } = response.data;
+    const { access, refresh, user, employee } = response.data;
 
+    // Step 2: Save tokens
     localStorage.setItem("access_token", access);
     localStorage.setItem("refresh_token", refresh);
 
-    // Step 2: Try profile
-    let userData;
-    try {
-      const profileResponse = await employeeAPI.getProfile();
-      userData = profileResponse.data;
-    } catch {
-      // fallback to token
-      const tokenData = JSON.parse(atob(access.split('.')[1]));
-      userData = { id: tokenData.user_id, username: credentials.username };
-    }
-
-    // Step 3: Admin status
-    const isAdmin = userData.is_staff || userData.is_superuser || false;
+    // Step 3: Admin status comes from backend user object
+    const isAdmin = user?.is_staff || user?.is_superuser || false;
 
     // Step 4: Save state
-    setUser(userData);
+    setUser(user);
+    setEmployee(employee);
     setIsAuthenticated(true);
     setIsAdmin(isAdmin);
-    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("user", JSON.stringify(user));
 
-    return { success: true, user: userData };
+    console.log("✅ Login successful:", user);
+    console.log("👑 Admin status:", isAdmin);
+
+    return { success: true, user, isAdmin };
   } catch (error) {
     console.error("❌ Login error:", error.response?.data || error.message);
     localStorage.clear();
     setUser(null);
+    setEmployee(null);
     setIsAuthenticated(false);
     setIsAdmin(false);
 
@@ -91,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     setLoading(false);
   }
 };
+
 
 
   const register = async (userData) => {
