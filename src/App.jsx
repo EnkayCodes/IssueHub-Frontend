@@ -1,4 +1,3 @@
-// App.js
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
@@ -10,10 +9,12 @@ import Register from './components/Register';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import IssueKanban from './components/IssueKanban';
 import EmployeeTasks from './components/EmployeeTasks';
+import MyIssues from './components/MyIssues';
 import AdminProfile from './components/AdminProfile';
 import UserProfile from './components/UserProfile';
 import LoadingSpinner from './components/LoadingSpinner';
-import AdminDashboard from './components/AdminDashboard'; // ✅ NEW
+import AdminDashboard from './components/AdminDashboard';
+import EmployeeLayout from './components/EmployeeLayout'; // NEW
 import './styles/App.css';
 
 class ErrorBoundary extends React.Component {
@@ -75,17 +76,35 @@ const AppRoutes = () => {
             path="/"
             element={
               <ProtectedRoute>
-                <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />
+                <Navigate to={isAdmin ? "/admin/dashboard" : "/employee/dashboard"} replace />
               </ProtectedRoute>
             }
           />
 
-          {/* Employee Dashboard */}
+          {/* Employee Routes */}
           <Route
-            path="/dashboard"
+            path="/employee/dashboard"
             element={
               <ProtectedRoute>
                 <EmployeeDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/employee/my-issues"
+            element={
+              <ProtectedRoute>
+                <MyIssues />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/employee/profile"
+            element={
+              <ProtectedRoute>
+                <UserProfile />
               </ProtectedRoute>
             }
           />
@@ -137,7 +156,7 @@ const AppRoutes = () => {
           />
 
           <Route
-            path="/my-tasks"
+            path="/employee/my-tasks"
             element={
               <ProtectedRoute>
                 <EmployeeTasks />
@@ -154,14 +173,9 @@ const AppRoutes = () => {
             }
           />
 
-          <Route
-            path="/profile"
-            element={
-              <ProtectedRoute>
-                <UserProfile />
-              </ProtectedRoute>
-            }
-          />
+          {/* Redirect old routes to new employee routes */}
+          <Route path="/dashboard" element={<Navigate to="/employee/dashboard" replace />} />
+          <Route path="/profile" element={<Navigate to="/employee/profile" replace />} />
         </Routes>
       </div>
     </>
