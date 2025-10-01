@@ -39,12 +39,12 @@ const EmployeeDashboard = () => {
     }).length,
   };
 
-  // Priority counts for pie chart
+  // Priority counts for pie chart - Updated order to match image
   const priorityCounts = {
+    'Critical': issues.filter(i => i.priority === 'Critical').length,
     'High': issues.filter(i => i.priority === 'High').length,
     'Medium': issues.filter(i => i.priority === 'Medium').length,
     'Low': issues.filter(i => i.priority === 'Low').length,
-    'Critical': issues.filter(i => i.priority === 'Critical').length,
   };
 
   // Recent activities
@@ -92,70 +92,85 @@ const EmployeeDashboard = () => {
 
   const getPriorityColorClass = (priority) => {
     const styles = {
+      Critical: 'priority-critical-color',
       High: 'priority-high-color',
       Medium: 'priority-medium-color',
       Low: 'priority-low-color',
-      Critical: 'priority-critical-color',
     };
     return `priority-color ${styles[priority] || 'priority-medium-color'}`;
   };
 
   const getPriorityColor = (priority) => {
     const colors = {
-      High: '#ef4444',
-      Medium: '#eab308',
-      Low: '#22c55e',
-      Critical: '#f97316',
+      Critical: '#f97316',    // Orange
+      High: '#ef4444',        // Red
+      Medium: '#eab308',      // Yellow
+      Low: '#22c55e',         // Green
     };
     return colors[priority] || '#6b7280';
   };
 
-  // Enhanced pie chart component
-  const PieChart = ({ data }) => {
-    const total = Object.values(data).reduce((sum, count) => sum + count, 0);
-    if (total === 0) {
-      return (
-        <div className="pie-chart" style={{ background: '#f3f4f6' }}>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-sm text-gray-500">No data</span>
-          </div>
-        </div>
-      );
-    }
-
-    let accumulatedPercent = 0;
-    const segments = Object.entries(data)
-      .filter(([_, count]) => count > 0)
-      .map(([priority, count]) => {
-        const percent = (count / total) * 100;
-        const segment = {
-          priority,
-          count,
-          percent,
-          start: accumulatedPercent,
-          end: accumulatedPercent + percent
-        };
-        accumulatedPercent += percent;
-        return segment;
-      });
-
+  // Enhanced pie chart component with better styling
+  // Enhanced pie chart component with CSS variables
+const PieChart = ({ data }) => {
+  const total = data.reduce((sum, d) => sum + d.value, 0);
+  if (total === 0) {
     return (
-      <div className="pie-chart">
-        {segments.map((segment) => (
-          <div
-            key={segment.priority}
-            className="pie-segment"
-            style={{
-              background: `conic-gradient(from ${segment.start}deg, ${getPriorityColor(segment.priority)} 0deg ${segment.percent}deg, transparent ${segment.percent}deg 360deg)`
-            }}
-          />
-        ))}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="w-12 h-12 bg-white rounded-full"></div>
+      <div className="pie-chart-container">
+        <div className="pie-chart-empty">
+          <div className="pie-center">
+            <span className="total-count">0</span>
+            <span className="total-label">Total</span>
+          </div>
         </div>
       </div>
     );
-  };
+  }
+
+  let accumulatedPercent = 0;
+  const segments = data.map((d) => {
+    const percent = (d.value / total) * 100;
+    const segment = {
+      ...d,
+      percent,
+      start: accumulatedPercent,
+      end: accumulatedPercent + percent
+    };
+    accumulatedPercent += percent;
+    return segment;
+  });
+
+  return (
+    <div className="pie-chart-container">
+      <div className="pie-chart">
+        {segments.map((segment, index) => (
+          <div
+            key={segment.title}
+            className="pie-segment"
+            style={{
+              '--segment-color': segment.color,
+              '--segment-percent': `${segment.percent}%`,
+              transform: `rotate(${segment.start * 3.6}deg)`
+            }}
+          />
+        ))}
+        <div className="pie-center">
+          <span className="total-count">{total}</span>
+          <span className="total-label">Total</span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+  // Build chart data (remove zeros so circle fills properly)
+  const chartData = Object.entries(priorityCounts)
+    .filter(([_, count]) => count > 0)
+    .map(([priority, count]) => ({
+      title: priority,
+      value: count,
+      color: getPriorityColor(priority)
+    }));
 
   return (
     <EmployeeLayout>
@@ -183,7 +198,10 @@ const EmployeeDashboard = () => {
           <div className="priority-section">
             <h2 className="section-header">Task by Priority</h2>
             <div className="priority-chart-container">
-              <PieChart data={priorityCounts} />
+              {/* Chart now uses filtered non-zero data */}
+              <PieChart data={chartData} />
+
+              {/* Legend still shows all (even if 0) */}
               <div className="priority-legend">
                 {Object.entries(priorityCounts).map(([priority, count]) => (
                   <div key={priority} className="priority-item">

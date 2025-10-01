@@ -4,6 +4,7 @@ import LoadingSpinner from './LoadingSpinner';
 import IssueKanban from './IssueKanban';
 import IssueForm from './IssueForm';
 import EmployeeTasks from './EmployeeTasks';
+import AdminReviewPage from './AdminReviewPage';
 import AdminProfile from './AdminProfile';
 import UserManagement from './UserManagement';
 import SystemSettings from './SystemSettings';
@@ -27,6 +28,8 @@ const AdminDashboard = () => {
                 return <IssueForm />;
             case 'team-tasks':
                 return <EmployeeTasks />;
+            case 'reviews':
+                return <AdminReviewPage />;
             case 'user-management':
                 return <UserManagement />;
             case 'system-settings':
@@ -78,6 +81,13 @@ const AdminDashboard = () => {
                         >
                             👥 Team Tasks
                         </button>
+                        <button 
+                            className={`nav-item ${activeSection === 'reviews' ? 'active' : ''}`}
+                            onClick={() => setActiveSection('reviews')}
+                        >
+                            📝 Review Requests
+                        </button>
+
                     </div>
 
                     <div className="nav-section">

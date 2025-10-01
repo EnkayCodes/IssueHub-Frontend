@@ -1,5 +1,6 @@
+// src/components/EmployeeTasks.jsx
 import React, { useState, useEffect } from 'react';
-import { issuesAPI } from '../services/api';
+import { issuesAPI, reviewAPI } from '../services/api'; // ✅ import reviewAPI
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
 import EmployeeLayout from './EmployeeLayout';
@@ -16,23 +17,33 @@ const EmployeeTasks = () => {
   }, [user]);
 
   const fetchEmployeeTasks = async () => {
-  try {
-    setLoading(true);
-    const response = await issuesAPI.getMyIssues(); // ✅ backend does filtering
-    console.log("🔎 My Issues API response:", response.data);
-    setTasks(response.data);
-  } catch (error) {
-    setError('Failed to fetch tasks');
-    console.error('Error fetching tasks:', error);
-  } finally {
-    setLoading(false);
-  }
-};
+    try {
+      setLoading(true);
+      const response = await issuesAPI.getMyIssues(); // ✅ backend filters by employee
+      console.log("🔎 My Issues API response:", response.data);
+      setTasks(response.data);
+    } catch (error) {
+      setError('Failed to fetch tasks');
+      console.error('Error fetching tasks:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-
+  // ✅ Updated to auto-create review request
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await issuesAPI.update(taskId, { status: newStatus });
+
+      if (newStatus === "Review") {  // ✅ switched from "blocked" → "Review"
+        try {
+          await reviewAPI.create(taskId);
+          console.log("✅ Review request created for task", taskId);
+        } catch (err) {
+          console.error("❌ Failed to create review request:", err.response?.data || err.message);
+        }
+      }
+
       setTasks(prev =>
         prev.map(task =>
           task.id === taskId ? { ...task, status: newStatus } : task
@@ -40,7 +51,7 @@ const EmployeeTasks = () => {
       );
     } catch (error) {
       setError('Failed to update task status');
-      console.error('Error updating task status:', error);
+      console.error('❌ Error updating task status:', error.response?.data || error.message);
     }
   };
 
@@ -58,7 +69,7 @@ const EmployeeTasks = () => {
       </EmployeeLayout>
     );
 
-  // ✅ Handle both frontend + backend status naming
+  // ✅ Group tasks by status
   const tasksByStatus = {
     'To Do': tasks.filter(task =>
       ['Open', 'Not Started', 'To Do'].includes(task.status)
@@ -67,7 +78,7 @@ const EmployeeTasks = () => {
       ['In Progress'].includes(task.status)
     ),
     'Review': tasks.filter(task =>
-      ['Review', 'Blocked', 'blocked'].includes(task.status)
+      ['Review'].includes(task.status)   // ✅ matches backend
     ),
     'Completed': tasks.filter(task =>
       ['Resolved', 'Completed'].includes(task.status)
@@ -162,9 +173,16 @@ const EmployeeTasks = () => {
                         >
                           <option value="Open">To Do</option>
                           <option value="In Progress">In Progress</option>
-                          <option value="Blocked">Review</option>
+                          <option value="Review">Review</option>     {/* ✅ updated */}
                           <option value="Resolved">Completed</option>
                         </select>
+                      </div>
+                    )}
+
+                    {/* ✅ Show admin feedback if available */}
+                    {task.latest_feedback && (
+                      <div className="admin-feedback bg-red-50 text-sm text-red-700 p-2 rounded mt-2">
+                        <strong>Admin feedback:</strong> {task.latest_feedback}
                       </div>
                     )}
                   </div>

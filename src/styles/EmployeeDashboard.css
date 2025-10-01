@@ -47,44 +47,59 @@
   color: #1e293b;
 }
 
-/* Main Content Grid - Side by side layout */
+/* Main Content Grid - Equal width sections */
 .main-content-grid {
   display: grid;
-  grid-template-columns: 1fr 2fr;
+  grid-template-columns: 1fr 1fr; /* Equal width for both sections */
   gap: 1.5rem;
   margin-bottom: 1.5rem;
+  align-items: start;
 }
 
-/* Task by Priority Section - Compact like reference */
+/* Task by Priority Section - Even bigger chart */
 .priority-section {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .section-header {
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #374151;
-  margin-bottom: 1rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #f1f5f9;
+  color: #1f2937;
+  margin-bottom: 1.5rem;
 }
 
+/* Even Bigger Pie Chart Styles */
 .priority-chart-container {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
+  flex: 1;
+  gap: 1.5rem;
+}
+
+.pie-chart-container {
+  position: relative;
+  width: 250px; /* Even bigger container */
+  height: 250px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .pie-chart {
   position: relative;
-  width: 100px;
-  height: 100px;
+  width: 220px; /* Even bigger chart */
+  height: 220px;
   border-radius: 50%;
-  margin-bottom: 1rem;
+  background: #f3f4f6;
 }
 
 .pie-segment {
@@ -95,51 +110,112 @@
   clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 50% 100%);
 }
 
+.pie-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 130px;
+  height: 130px;
+  background: white;
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.total-count {
+  font-size: 1.75rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.total-label {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 2px;
+}
+
+.pie-chart-empty {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Priority Legend - Single line, much smaller tags with no space */
 .priority-legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 6px;
   width: 100%;
+  max-width: 150px;
 }
 
 .priority-item {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.25rem 0;
-  font-size: 0.75rem;
+  padding: 2px 0;
 }
 
 .priority-label {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-weight: 500;
+  gap: 4px;
+  font-size: 0.65rem; /* Much smaller font */
   color: #374151;
+  white-space: nowrap;
 }
 
 .priority-color {
-  width: 8px;
-  height: 8px;
+  width: 6px; /* Smaller dot */
+  height: 6px;
   border-radius: 50%;
   display: inline-block;
+  flex-shrink: 0;
 }
 
 .priority-count {
   font-weight: 600;
   color: #1f2937;
+  font-size: 0.65rem; /* Much smaller font */
+  white-space: nowrap;
+  margin-left: 2px; /* Reduced space between name and number */
+}
+
+/* Remove space between priority name and number */
+.priority-item {
+  justify-content: flex-start; /* Align to left */
+  gap: 0; /* Remove gap between elements */
+}
+
+.priority-label {
+  margin-right: 0; /* Remove right margin */
 }
 
 /* Priority Colors */
+.priority-critical-color { background-color: #f97316; }
 .priority-high-color { background-color: #ef4444; }
 .priority-medium-color { background-color: #eab308; }
 .priority-low-color { background-color: #22c55e; }
-.priority-critical-color { background-color: #f97316; }
 
-/* My Tasks Section */
+/* My Tasks Section - Same width as Priority section */
 .tasks-section {
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .tasks-header {
@@ -150,7 +226,11 @@
 }
 
 .tasks-container {
-  space-y: 0.5rem;
+  padding: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 .task-item {
@@ -215,7 +295,7 @@
   white-space: nowrap;
 }
 
-/* Priority Badge Colors - Smaller like reference */
+/* Priority Badge Colors */
 .priority-high {
   background: #fee2e2;
   color: #dc2626;
@@ -245,20 +325,25 @@
   background: white;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 1.5rem;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
 }
 
 .activities-container {
-  space-y: 0.75rem;
+  padding: 0;
 }
 
 .activity-item {
   display: flex;
   align-items: flex-start;
   gap: 0.5rem;
-  padding: 0.25rem 0;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.activity-item:last-child {
+  border-bottom: none;
 }
 
 .activity-checkbox {
@@ -269,6 +354,7 @@
   margin-top: 0.125rem;
   background: white;
   cursor: pointer;
+  flex-shrink: 0;
 }
 
 .activity-checkbox:checked {
@@ -395,4 +481,12 @@
 
 .pie-chart {
   animation: pie-chart-animation 0.6s ease-out;
+}
+
+/* Fix for conic gradient fill */
+.pie-segment {
+  background: conic-gradient(
+    var(--segment-color) 0% var(--segment-percent), 
+    transparent var(--segment-percent) 100%
+  ) !important;
 }

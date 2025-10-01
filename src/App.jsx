@@ -9,6 +9,7 @@ import Register from './components/Register';
 import EmployeeDashboard from './components/EmployeeDashboard';
 import IssueKanban from './components/IssueKanban';
 import EmployeeTasks from './components/EmployeeTasks';
+import AdminReviewPage from './components/AdminReviewPage';
 import MyIssues from './components/MyIssues';
 import AdminProfile from './components/AdminProfile';
 import UserProfile from './components/UserProfile';
@@ -172,6 +173,16 @@ const AppRoutes = () => {
               </ProtectedRoute>
             }
           />
+
+          <Route
+            path="/admin/reviews"
+            element={
+              <ProtectedRoute adminOnly={true}>
+                <AdminReviewPage />
+              </ProtectedRoute>
+            }
+          />
+
 
           {/* Redirect old routes to new employee routes */}
           <Route path="/dashboard" element={<Navigate to="/employee/dashboard" replace />} />

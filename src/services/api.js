@@ -1,6 +1,8 @@
+// src/services/api.js
 import axios from 'axios';
 import { API_BASE_URL } from '../utils/constants';
 
+// ✅ Create axios instance with interceptors
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
@@ -26,7 +28,6 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
-    // if token expired (401) and request not retried yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
@@ -36,14 +37,12 @@ api.interceptors.response.use(
           const res = await axios.post(`${API_BASE_URL}/token/refresh/`, { refresh });
           const newAccess = res.data.access;
 
-          // Save new access token
           localStorage.setItem('access_token', newAccess);
 
-          // Update header & retry request
           originalRequest.headers.Authorization = `Bearer ${newAccess}`;
           return api(originalRequest);
         } catch (err) {
-          // Refresh failed → logout
+          // Refresh failed → force logout
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           localStorage.removeItem('user');
@@ -56,20 +55,26 @@ api.interceptors.response.use(
   }
 );
 
-// ✅ Authentication API
+//
+// -------------------------------
+// ✅ API GROUPS
+// -------------------------------
+//
+
+// 🔑 Authentication API
 export const authAPI = {
   login: (credentials) => api.post('/token/', credentials),
   refreshToken: (refresh) => api.post('/token/refresh/', { refresh }),
   register: (userData) => api.post('/register/', userData),
 };
 
-// ✅ Employee API
+// 👤 Employee API
 export const employeeAPI = {
   getProfile: () => api.get('/profile/'),
   getAll: () => api.get('/employees/'),
 };
 
-// ✅ Issues API
+// 📌 Issues API
 export const issuesAPI = {
   getAll: (params = {}) => api.get('/issue/', { params }),
   getById: (id) => api.get(`/issue/${id}/`),
@@ -79,15 +84,32 @@ export const issuesAPI = {
   getMyIssues: () => api.get('/issue/my_issues/'), // 🔥 employee-specific
 };
 
-// ✅ Comments API
+//
+// -------------------------------
+// 📝 Comments API (updated)
+// -------------------------------
 export const commentsAPI = {
-  getByIssue: (issueId) => api.get(`/issues/${issueId}/comments/`),
-  create: (issueId, data) => api.post(`/issues/${issueId}/comments/`, data),
+  getByIssue: (issueId) => api.get(`/comments/?issue=${issueId}`), // unified endpoint
+  create: (issueId, text) => api.post(`/comments/`, { issue: issueId, text }),
   update: (commentId, data) => api.put(`/comments/${commentId}/`, data),
   delete: (commentId) => api.delete(`/comments/${commentId}/`),
 };
 
-// ✅ Activity API
+//
+// -------------------------------
+// 🛠 Review Request API (new)
+// -------------------------------
+export const reviewAPI = {
+  create: (issueId) => api.post('/review-requests/', { issue: issueId }),
+  getAll: () => api.get('/review-requests/'),
+  decide: (requestId, approved, feedback = "") =>
+    api.post(`/review-requests/${requestId}/decide/`, { approved, feedback }),
+};
+
+//
+// -------------------------------
+// 📊 Activity API
+// -------------------------------
 export const activityAPI = {
   getRecent: () => api.get('/activity/'),
 };
