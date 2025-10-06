@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { issuesAPI } from '../services/api';
+import { issuesAPI, employeeAPI, activityAPI } from '../services/api'; // 👈 add employeeAPI
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
 import EmployeeLayout from './EmployeeLayout';
@@ -8,6 +8,7 @@ import '../styles/EmployeeDashboard.css';
 const EmployeeDashboard = () => {
   const { user } = useAuth();
   const [issues, setIssues] = useState([]);
+  const [activities, setActivities] = useState([]); // 👈 state for activities
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,6 +23,18 @@ const EmployeeDashboard = () => {
       }
     };
     if (user) fetchIssues();
+  }, [user]);
+
+  useEffect(() => {
+    const fetchActivities = async () => {
+      try {
+         const res = await activityAPI.getRecent(); // 👈 call employee API
+        setActivities(res.data);
+      } catch (err) {
+        console.error('Error fetching activities:', err);
+      }
+    };
+    if (user) fetchActivities();
   }, [user]);
 
   // Status counts
@@ -39,7 +52,7 @@ const EmployeeDashboard = () => {
     }).length,
   };
 
-  // Priority counts for pie chart - Updated order to match image
+  // Priority counts
   const priorityCounts = {
     'Critical': issues.filter(i => i.priority === 'Critical').length,
     'High': issues.filter(i => i.priority === 'High').length,
@@ -47,31 +60,7 @@ const EmployeeDashboard = () => {
     'Low': issues.filter(i => i.priority === 'Low').length,
   };
 
-  // Recent activities
-  const recentActivities = [
-    {
-      type: 'status_change',
-      text: 'You changed a class of "Review Q3 Financial Report" to "In Progress".',
-      completed: false
-    },
-    {
-      type: 'comment',
-      text: 'You commented on "Purpose Marketing Campaign Brief": "Washing feedback from design."',
-      completed: false
-    },
-    {
-      type: 'assigned',
-      text: 'You were assigned "Draft New Feature Specification" by Sarah M.',
-      completed: true
-    },
-    {
-      type: 'review_request',
-      text: 'You requested review for "Implement User Authentication".',
-      completed: false
-    }
-  ];
-
-  // My Tasks - limited to 6 most recent or important
+  // My Tasks - limited to 6 most recent
   const myTasks = issues.slice(0, 6);
 
   if (loading) return (
@@ -110,60 +99,57 @@ const EmployeeDashboard = () => {
     return colors[priority] || '#6b7280';
   };
 
-  // Enhanced pie chart component with better styling
-  // Enhanced pie chart component with CSS variables
-const PieChart = ({ data }) => {
-  const total = data.reduce((sum, d) => sum + d.value, 0);
-  if (total === 0) {
+  const PieChart = ({ data }) => {
+    const total = data.reduce((sum, d) => sum + d.value, 0);
+    if (total === 0) {
+      return (
+        <div className="pie-chart-container">
+          <div className="pie-chart-empty">
+            <div className="pie-center">
+              <span className="total-count">0</span>
+              <span className="total-label">Total</span>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    let accumulatedPercent = 0;
+    const segments = data.map((d) => {
+      const percent = (d.value / total) * 100;
+      const segment = {
+        ...d,
+        percent,
+        start: accumulatedPercent,
+        end: accumulatedPercent + percent
+      };
+      accumulatedPercent += percent;
+      return segment;
+    });
+
     return (
       <div className="pie-chart-container">
-        <div className="pie-chart-empty">
+        <div className="pie-chart">
+          {segments.map((segment, index) => (
+            <div
+              key={segment.title}
+              className="pie-segment"
+              style={{
+                '--segment-color': segment.color,
+                '--segment-percent': `${segment.percent}%`,
+                transform: `rotate(${segment.start * 3.6}deg)`
+              }}
+            />
+          ))}
           <div className="pie-center">
-            <span className="total-count">0</span>
+            <span className="total-count">{total}</span>
             <span className="total-label">Total</span>
           </div>
         </div>
       </div>
     );
-  }
+  };
 
-  let accumulatedPercent = 0;
-  const segments = data.map((d) => {
-    const percent = (d.value / total) * 100;
-    const segment = {
-      ...d,
-      percent,
-      start: accumulatedPercent,
-      end: accumulatedPercent + percent
-    };
-    accumulatedPercent += percent;
-    return segment;
-  });
-
-  return (
-    <div className="pie-chart-container">
-      <div className="pie-chart">
-        {segments.map((segment, index) => (
-          <div
-            key={segment.title}
-            className="pie-segment"
-            style={{
-              '--segment-color': segment.color,
-              '--segment-percent': `${segment.percent}%`,
-              transform: `rotate(${segment.start * 3.6}deg)`
-            }}
-          />
-        ))}
-        <div className="pie-center">
-          <span className="total-count">{total}</span>
-          <span className="total-label">Total</span>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-  // Build chart data (remove zeros so circle fills properly)
   const chartData = Object.entries(priorityCounts)
     .filter(([_, count]) => count > 0)
     .map(([priority, count]) => ({
@@ -182,7 +168,7 @@ const PieChart = ({ data }) => {
           </h1>
         </div>
 
-        {/* Quick Stats Cards - Smaller and inline */}
+        {/* Quick Stats Cards */}
         <div className="stats-grid">
           {Object.entries(statusCounts).map(([status, count]) => (
             <div key={status} className="stats-card">
@@ -192,16 +178,13 @@ const PieChart = ({ data }) => {
           ))}
         </div>
 
-        {/* Main Content Grid - Side by side */}
+        {/* Main Content Grid */}
         <div className="main-content-grid">
           {/* Left Column - Task by Priority */}
           <div className="priority-section">
             <h2 className="section-header">Task by Priority</h2>
             <div className="priority-chart-container">
-              {/* Chart now uses filtered non-zero data */}
               <PieChart data={chartData} />
-
-              {/* Legend still shows all (even if 0) */}
               <div className="priority-legend">
                 {Object.entries(priorityCounts).map(([priority, count]) => (
                   <div key={priority} className="priority-item">
@@ -246,9 +229,7 @@ const PieChart = ({ data }) => {
                   </div>
                 ))
               ) : (
-                <div className="empty-state">
-                  No tasks assigned to you yet.
-                </div>
+                <div className="empty-state">No tasks assigned to you yet.</div>
               )}
             </div>
           </div>
@@ -258,17 +239,18 @@ const PieChart = ({ data }) => {
         <div className="activities-section">
           <h2 className="section-header">Recent Activity</h2>
           <div className="activities-container">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <input 
-                  type="checkbox" 
-                  checked={activity.completed}
-                  readOnly
-                  className="activity-checkbox"
-                />
-                <span className="activity-text">{activity.text}</span>
-              </div>
-            ))}
+            {activities.length > 0 ? (
+              activities.map((activity) => (
+                <div key={activity.id} className="activity-item">
+                  <span className="activity-text">
+                    {activity.action} on "{activity.issue_title}" 
+                    ({new Date(activity.timestamp).toLocaleString()})
+                  </span>
+                </div>
+              ))
+            ) : (
+              <div className="empty-state">No recent activity yet.</div>
+            )}
           </div>
         </div>
 

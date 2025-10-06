@@ -1,5 +1,6 @@
 // src/components/EmployeeTasks.jsx
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { issuesAPI, reviewAPI } from '../services/api'; // ✅ import reviewAPI
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
@@ -11,6 +12,7 @@ const EmployeeTasks = () => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const navigate = useNavigate();  // ✅ hook for navigation
 
   useEffect(() => {
     if (user) fetchEmployeeTasks();
@@ -136,7 +138,11 @@ const EmployeeTasks = () => {
 
               <div className="tasks-list">
                 {tasksByStatus[column.key]?.map(task => (
-                  <div key={task.id} className="task-card bg-white rounded-lg shadow-sm border border-gray-200">
+                  <div 
+                  key={task.id} 
+                  className="task-card bg-white rounded-lg shadow-sm border border-gray-200"
+                  onClick={() => navigate(`/employee/issues/${task.id}`)}  // ✅ navigate
+                  >
                     <div className="task-header">
                       <h4 className="task-title font-medium text-gray-900">{task.title}</h4>
                       <span

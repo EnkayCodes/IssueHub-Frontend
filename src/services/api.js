@@ -89,8 +89,8 @@ export const issuesAPI = {
 // 📝 Comments API (updated)
 // -------------------------------
 export const commentsAPI = {
-  getByIssue: (issueId) => api.get(`/comments/?issue=${issueId}`), // unified endpoint
-  create: (issueId, text) => api.post(`/comments/`, { issue: issueId, text }),
+  getByIssue: (issueId) => api.get(`/comments/?issue=${issueId}`), 
+  create: (data) => api.post(`/comments/`, data),   // ✅ accepts object
   update: (commentId, data) => api.put(`/comments/${commentId}/`, data),
   delete: (commentId) => api.delete(`/comments/${commentId}/`),
 };
@@ -111,7 +111,8 @@ export const reviewAPI = {
 // 📊 Activity API
 // -------------------------------
 export const activityAPI = {
-  getRecent: () => api.get('/activity/'),
+  getRecent: () => api.get('/activity/'),       // ActivityViewSet
+  getMyActivities: () => api.get('/my-activities/'), // MyActivitiesView
 };
 
 export default api;

@@ -148,7 +148,7 @@ const AppRoutes = () => {
           />
 
           <Route
-            path="/issue/:id"
+            path="/employee/issues/:id"
             element={
               <ProtectedRoute>
                 <IssueDetail />
