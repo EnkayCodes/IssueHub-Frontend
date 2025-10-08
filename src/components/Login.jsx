@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import '../styles/App.css';
+import '../styles/Login.css';
 
 const Login = () => {
   const [credentials, setCredentials] = useState({
@@ -66,47 +66,77 @@ const Login = () => {
   if (loading) return <LoadingSpinner message="Logging in..." />;
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <h1>Login to IssueHub</h1>
-        
-        {error && <div className="error-message">{error}</div>}
-        
+    <div className="container">
+      <div className="form-box login" id="form-box-login">
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="username">Username *</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={credentials.username}
-              onChange={handleChange}
-              required
-              placeholder="Enter your username"
-            />
+          <h1>Welcome to Issue Tracker</h1>
+          <p>Sign in or create an account to manage your projects.</p>
+          
+          <div className="optional">
+            <button type="button" className="signin-btn active">
+              Sign in
+            </button>
+            <Link to="/register" className="signup-btn">
+              Sign Up
+            </Link>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password *</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={credentials.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-            />
+          {error && <div className="error-message">{error}</div>}
+
+          <div className="user">
+            <h5>Email/Username</h5>
+            <div className="input-box">
+              <input
+                type="text"
+                name="username"
+                value={credentials.username}
+                onChange={handleChange}
+                required
+                placeholder="Enter your username"
+              />
+              <i className='bx bxs-user'></i>
+            </div>
           </div>
 
-          <button type="submit" disabled={loading} className="primary-btn">
-            {loading ? 'Logging in...' : 'Login'}
+          <div className="pass">
+            <h5>Password</h5>
+            <div className="input-box">
+              <input
+                type="password"
+                name="password"
+                value={credentials.password}
+                onChange={handleChange}
+                required
+                placeholder="Enter your password"
+              />
+              <i className='bx bxs-lock-alt'></i>
+            </div>
+          </div>
+
+          <div className="forgot-link">
+            <a href="#">Forgot Password?</a>
+          </div>
+
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? 'Signing in...' : 'Sign in'}
           </button>
-        </form>
 
-        <p className="register-link">
-          Don't have an account? <Link to="/register">Register here</Link>
-        </p>
+          <p className="or">OR CONTINUE WITH</p>
+          <div>
+            <div className="google">
+              <a href="#">
+                Login with Google
+                <i className='bx bxl-google'></i>
+              </a>
+            </div>
+            <div className="micro">
+              <a href="#">
+                Login with Microsoft
+                <i className='bx bxl-microsoft'></i>
+              </a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

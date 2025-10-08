@@ -1,3 +1,31 @@
+:root{
+  /*primary colors for interface elements */
+    --color-tea-green: #68ca99;
+    --color-beige: #f8ecdc;
+    --color-cornsilk: #fefae0ff;
+    --color-papaya-whip: #e1bda5;
+    --color-buff: #d4a373ff;
+
+    /* secondary colors for interface elements*/
+    --secondary-color: #76e72b;
+    --secondary-dark: #92cf8e;
+
+    /* neutral colors for interface elements */
+    --background-color: #f9f2ec;
+    --surface-color: #fff;
+    --border-color: #bdc3c7;
+
+    /* text colors */
+    --text-primary: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+
+    /* status colors */
+    --success-color: #2ecc71;
+    --error-color: #e74c3c; /* red for error messages */
+    --warning-color: #f39c12; /*orange for warnings */
+}
+
 .admin-dashboard {
   display: flex;
   min-height: calc(100vh - 70px); /* Adjust based on your navbar height */

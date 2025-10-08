@@ -15,7 +15,7 @@ import AdminProfile from './components/AdminProfile';
 import UserProfile from './components/UserProfile';
 import LoadingSpinner from './components/LoadingSpinner';
 import AdminDashboard from './components/AdminDashboard';
-import EmployeeLayout from './components/EmployeeLayout'; // NEW
+import EmployeeLayout from './components/EmployeeLayout'; 
 import './styles/App.css';
 
 class ErrorBoundary extends React.Component {

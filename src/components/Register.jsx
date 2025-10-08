@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import LoadingSpinner from './LoadingSpinner';
-import '../styles/App.css';
+import '../styles/Login.css';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -14,7 +14,7 @@ const Register = () => {
     last_name: '',
     department: '',
     position: '',
-    phone_number: '' // Added phone_number field
+    phone_number: ''
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -58,7 +58,6 @@ const Register = () => {
         department: formData.department.trim(),
         position: formData.position.trim(),
         phone_number: formData.phone_number.trim()
-    
       };
 
       const result = await register(registrationData);
@@ -90,137 +89,177 @@ const Register = () => {
   if (loading) return <LoadingSpinner message="Creating your account..." />;
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <h1>Create Account</h1>
-        
-        {error && <div className="error-message">{error}</div>}
-        
+    <div className="container">
+      <div className="form-box signup" id="form-box-signup">
         <form onSubmit={handleSubmit}>
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="first_name">First Name</label>
-              <input
-                type="text"
-                id="first_name"
-                name="first_name"
-                value={formData.first_name}
-                onChange={handleChange}
-                placeholder="Enter your first name"
-              />
-            </div>
+          <h1>Welcome to Issue Tracker</h1>
+          <p>Sign in or create an account to manage your projects.</p>
+          
+          <div className="optional">
+            <Link to="/login" className="signin-btn">
+              Sign in
+            </Link>
+            <button type="button" className="signup-btn active">
+              Sign Up
+            </button>
+          </div>
 
-            <div className="form-group">
-              <label htmlFor="last_name">Last Name</label>
+          {error && <div className="error-message">{error}</div>}
+
+          <div className="user">
+            <h5>Username</h5>
+            <div className="input-box">
               <input
                 type="text"
-                id="last_name"
-                name="last_name"
-                value={formData.last_name}
+                name="username"
+                value={formData.username}
                 onChange={handleChange}
-                placeholder="Enter your last name"
+                required
+                placeholder="username"
               />
+              <i className='bx bxs-user'></i>
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="username">Username *</label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              required
-              placeholder="Choose a username"
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Enter your email"
-            />
+          <div className="user">
+            <h5>Email</h5>
+            <div className="input-box">
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="a@email.com"
+              />
+              <i className='bx bxs-envelope'></i>
+            </div>
           </div>
 
           <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="department">Department</label>
-              <input
-                type="text"
-                id="department"
-                name="department"
-                value={formData.department}
-                onChange={handleChange}
-                placeholder="e.g., Engineering"
-              />
+            <div className="user">
+              <h5>First Name</h5>
+              <div className="input-box">
+                <input
+                  type="text"
+                  name="first_name"
+                  value={formData.first_name}
+                  onChange={handleChange}
+                  placeholder="First name"
+                />
+                <i className='bx bxs-user'></i>
+              </div>
             </div>
 
-            <div className="form-group">
-              <label htmlFor="position">Position</label>
-              <input
-                type="text"
-                id="position"
-                name="position"
-                value={formData.position}
-                onChange={handleChange}
-                placeholder="e.g., Developer"
-              />
+            <div className="user">
+              <h5>Last Name</h5>
+              <div className="input-box">
+                <input
+                  type="text"
+                  name="last_name"
+                  value={formData.last_name}
+                  onChange={handleChange}
+                  placeholder="Last name"
+                />
+                <i className='bx bxs-user'></i>
+              </div>
             </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="phone_number">Phone Number</label>
-            <input
-              type="tel"
-              id="phone_number"
-              name="phone_number"
-              value={formData.phone_number}
-              onChange={handleChange}
-              placeholder="Enter your phone number"
-            />
+          <div className="form-row">
+            <div className="user">
+              <h5>Department</h5>
+              <div className="input-box">
+                <input
+                  type="text"
+                  name="department"
+                  value={formData.department}
+                  onChange={handleChange}
+                  placeholder="e.g., Engineering"
+                />
+                <i className='bx bxs-building'></i>
+              </div>
+            </div>
+
+            <div className="user">
+              <h5>Position</h5>
+              <div className="input-box">
+                <input
+                  type="text"
+                  name="position"
+                  value={formData.position}
+                  onChange={handleChange}
+                  placeholder="e.g., Developer"
+                />
+                <i className='bx bxs-briefcase'></i>
+              </div>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="password">Password *</label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="6"
-              placeholder="Enter password (min. 6 characters)"
-            />
+          <div className="user">
+            <h5>Phone Number</h5>
+            <div className="input-box">
+              <input
+                type="tel"
+                name="phone_number"
+                value={formData.phone_number}
+                onChange={handleChange}
+                placeholder="Enter your phone number"
+              />
+              <i className='bx bxs-phone'></i>
+            </div>
           </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password *</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
-              required
-              placeholder="Confirm your password"
-            />
+          <div className="pass">
+            <h5>Password</h5>
+            <div className="input-box">
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                minLength="6"
+                placeholder="Password"
+              />
+              <i className='bx bxs-lock-alt'></i>
+            </div>
           </div>
 
-          <button type="submit" disabled={loading} className="primary-btn">
-            {loading ? 'Creating Account...' : 'Register'}
+          <div className="pass">
+            <h5>Confirm Password</h5>
+            <div className="input-box">
+              <input
+                type="password"
+                name="confirmPassword"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                required
+                placeholder="Confirm password"
+              />
+              <i className='bx bxs-lock-alt'></i>
+            </div>
+          </div>
+
+          <button className="btn" type="submit" disabled={loading}>
+            {loading ? 'Signing up...' : 'Sign up'}
           </button>
-        </form>
 
-        <p className="register-link">
-          Already have an account? <Link to="/login">Login here</Link>
-        </p>
+          <p className="or">OR CONTINUE WITH</p>
+          <div>
+            <div className="google">
+              <a href="#">
+                Sign up with Google
+                <i className='bx bxl-google'></i>
+              </a>
+            </div>
+            <div className="micro">
+              <a href="#">
+                Sign up with Microsoft
+                <i className='bx bxl-microsoft'></i>
+              </a>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

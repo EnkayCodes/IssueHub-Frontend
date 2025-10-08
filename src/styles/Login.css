@@ -1,0 +1,378 @@
+/*
+CSS Organisation
+1. CSS Reset and set up base style
+2. CSS custom properties(variables)
+3. layout component
+4. Interactive element
+5. Animations and transitions
+6. Utility Classes
+7. Media Queries for Responsiveness
+*/
+
+/* 1. CSS Reset and Base Styles -- Remove default browser styling*/
+*{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 2. CSS Custom Properties(variables)*/
+:root{
+    /*primary colors for interface elements */
+    --color-tea-green: #68ca99;
+    --color-beige: #f8ecdc;
+    --color-cornsilk: #fefae0ff;
+    --color-papaya-whip: #e1bda5;
+    --color-buff: #d4a373ff;
+
+    /* secondary colors for interface elements*/
+    --secondary-color: #76e72b;
+    --secondary-dark: #92cf8e;
+
+    /* neutral colors for interface elements */
+    --background-color: #f9f2ec;
+    --surface-color: #fff;
+    --border-color: #bdc3c7;
+
+    /* text colors */
+    --text-primary: #696767;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+
+    /* status colors */
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --warning-color: #f39c12;
+
+    /* spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /*typography */
+    --font-primary: 'Inter', sans-serif;
+    --font-none: 'Courier New', monospace;
+
+    /*Font sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+
+    /* layout */
+    --container-max-width: 1200px;
+
+    /*Border Radius */
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
+
+    /* Box Shadow */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body{
+    font-family: var(--font-primary);
+    background-color: var(--background-color);
+}
+
+.container {
+    font-family: var(--font-primary);
+    padding: var(--spacing-lg);
+    margin: 0 2px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+.form-box {
+    border: 2px solid var(--color-buff);
+    background: var(--surface-color);
+    padding: var(--spacing-2xl);
+    color: var(--text-primary);
+    border-radius: var(--border-radius-md);
+    box-shadow: var(--shadow-lg);
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+}
+
+/* Remove the hiding rule for signup forms */
+.form-box.signup {
+    visibility: visible;
+    display: block;
+}
+
+.form-box h1{
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    font-size: var(--text-2xl);
+}
+
+.form-box p{
+    text-align: center;
+    margin-bottom: var(--spacing-md);
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+}
+
+.optional{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg);
+}
+
+.signin-btn, .signup-btn{
+    font-weight: 700;
+    padding: var(--spacing-sm) var(--spacing-xl);
+    font-size: var(--text-base);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    border: none;
+    white-space: nowrap;
+    text-decoration: none;
+    display: inline-block;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.signin-btn{
+    background-color: var(--color-beige);
+    color: var(--text-primary);
+}
+
+.signin-btn.active, .signup-btn.active{
+    background-color: var(--color-tea-green);
+    color: white;
+}
+
+.signup-btn{
+    background-color: var(--color-beige);
+    color: var(--text-primary);
+}
+
+.signin-btn:hover, .signup-btn:hover{
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.user, .pass{
+    padding: var(--spacing-md) 0 0;
+    color: var(--text-primary);
+}
+
+.user h5, .pass h5{
+    font-size: var(--text-sm);
+    margin-bottom: var(--spacing-xs);
+    color: var(--text-primary);
+}
+
+.input-box{
+    margin: var(--spacing-xs) 0;
+    border: 1px solid var(--color-buff);
+    border-radius: var(--border-radius-md);
+    position: relative;
+    transition: border-color 0.3s ease;
+}
+
+.input-box:focus-within{
+    border-color: var(--color-tea-green);
+}
+
+.input-box i{
+    position: absolute;
+    left: var(--spacing-sm);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-buff);
+}
+
+.input-box input{
+    width: 100%;
+    padding: var(--spacing-sm);
+    padding-left: var(--spacing-xl);
+    border-radius: var(--border-radius-md);
+    border: none;
+    font-size: var(--text-base);
+    background: transparent;
+    color: var(--text-primary);
+}
+
+.input-box input:focus{
+    outline: none;
+}
+
+.input-box input::placeholder{
+    color: var(--text-muted);
+}
+
+.forgot-link{
+    text-align: right;
+    margin: var(--spacing-sm) 0;
+    white-space: nowrap;
+}
+
+.forgot-link a{
+    text-decoration: none;
+    color: var(--color-tea-green);
+    font-size: var(--text-sm);
+}
+
+.forgot-link a:hover{
+    text-decoration: underline;
+}
+
+.btn{
+    background-color: var(--color-tea-green);
+    color: white;
+    font-weight: 700;
+    width: 100%;
+    padding: var(--spacing-md);
+    border-radius: var(--border-radius-sm);
+    margin-top: var(--spacing-md);
+    font-size: var(--text-base);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+}
+
+.btn:hover:not(:disabled){
+    background-color: var(--secondary-dark);
+    transform: translateY(-1px);
+}
+
+.btn:disabled{
+    background-color: var(--text-muted);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.or{
+    padding: var(--spacing-lg) 0 var(--spacing-md);
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    position: relative;
+}
+
+.or::before, .or::after{
+    content: "——————————";
+    color: var(--border-color);
+    margin: 0 var(--spacing-sm);
+}
+
+.google, .micro{
+    padding: var(--spacing-sm);
+    display: flex;
+    justify-content: center;
+    margin-bottom: var(--spacing-sm);
+    border: 1px solid var(--color-buff);
+    border-radius: var(--border-radius-md);
+    transition: background-color 0.3s ease;
+}
+
+.google:hover, .micro:hover{
+    background-color: var(--color-beige);
+}
+
+.google a, .micro a{
+    color: var(--text-primary);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    font-size: var(--text-sm);
+}
+
+.google i, .micro i{
+    color: var(--color-buff);
+    font-size: var(--text-lg);
+}
+
+/* New styles for registration form */
+.form-row{
+    display: flex;
+    gap: var(--spacing-md);
+    margin-bottom: 0;
+}
+
+.form-row .user{
+    flex: 1;
+    padding: var(--spacing-md) 0 0;
+}
+
+.form-row .input-box{
+    margin: var(--spacing-xs) 0;
+}
+
+/* Error message styling */
+.error-message{
+    background-color: rgba(231, 76, 60, 0.1);
+    color: var(--error-color);
+    padding: var(--spacing-sm);
+    border-radius: var(--border-radius-sm);
+    margin: var(--spacing-md) 0;
+    text-align: center;
+    border-left: 4px solid var(--error-color);
+    font-size: var(--text-sm);
+}
+
+/* Additional icons */
+.bxs-building, .bxs-briefcase, .bxs-phone, .bxs-envelope{
+    color: var(--color-buff);
+}
+
+/* Responsive Design */
+@media (max-width: 768px){
+    .container{
+        padding: var(--spacing-md);
+    }
+    
+    .form-box{
+        padding: var(--spacing-xl);
+        max-width: 100%;
+    }
+    
+    .form-row{
+        flex-direction: column;
+        gap: 0;
+    }
+    
+    .optional{
+        flex-direction: column;
+        gap: var(--spacing-sm);
+    }
+    
+    .signin-btn, .signup-btn{
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px){
+    .form-box{
+        padding: var(--spacing-lg);
+    }
+    
+    .or::before, .or::after{
+        content: "———";
+        margin: 0 var(--spacing-xs);
+    }
+}
+
+.hidden{
+    display: none;
+}

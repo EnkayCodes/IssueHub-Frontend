@@ -345,6 +345,30 @@ button.secondary:hover:not(:disabled) {
   color: #666;
 }
 
+/* Issue Form */
+.issue-form{
+  padding: 20px;
+}
+
+.back-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-button:hover {
+  background-color: black;
+}
+
 /* Priority badges */
 .priority-badge {
   padding: 0.25rem 0.5rem;

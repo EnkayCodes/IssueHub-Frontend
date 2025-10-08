@@ -1,3 +1,89 @@
+/*
+CSS Organisation
+1. CSS Reset and set up base style
+2. CSS custom properties(variables)
+3. layout component
+4. Interactive element
+5. Animations and transitions
+6. Utility Classes
+7. Media Queries for Responsiveness
+*/
+
+/* 1. CSS Reset and Base Styles -- Remove default browser styling*/
+*{
+    margin:0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* 2. CSS Custom Properties(variables)*/
+:root{
+    /*primary colors for interface elements */
+    --color-tea-green: #68ca99;
+    --color-beige: #f8ecdc;
+    --color-cornsilk: #fefae0ff;
+    --color-papaya-whip: #e1bda5;
+    --color-buff: #d4a373ff;
+
+    /* secondary colors for interface elements*/
+    --secondary-color: #76e72b;
+    --secondary-dark: #92cf8e;
+
+    /* neutral colors for interface elements */
+    --background-color: #f9f2ec;
+    --surface-color: #fff;
+    --border-color: #bdc3c7;
+
+    /* text colors */
+    --text-primary: #696767;
+    --text-secondary: #7f8c8d;
+    --text-muted: #95a5a6;
+
+    /* status colors */
+    --success-color: #2ecc71;
+    --error-color: #e74c3c;
+    --warning-color: #f39c12;
+
+    /* spacing */
+    --spacing-xs: 0.25rem;
+    --spacing-sm: 0.5rem;
+    --spacing-md: 1rem;
+    --spacing-lg: 1.5rem;
+    --spacing-xl: 2rem;
+    --spacing-2xl: 3rem;
+
+    /*typography */
+    --font-primary: 'Inter', sans-serif;
+    --font-none: 'Courier New', monospace;
+
+    /*Font sizes */
+    --text-xs: 0.75rem;
+    --text-sm: 0.875rem;
+    --text-base: 1rem;
+    --text-lg: 1.125rem;
+    --text-xl: 1.25rem;
+    --text-2xl: 1.5rem;
+    --text-3xl: 1.875rem;
+
+    /* layout */
+    --container-max-width: 1200px;
+
+    /*Border Radius */
+    --border-radius-sm: 0.25rem;
+    --border-radius-md: 0.5rem;
+    --border-radius-lg: 0.75rem;
+
+    /* Box Shadow */
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.25);
+    --shadow-md: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+body{
+    font-family: var(--font-primary);
+    background-color: white;
+}
+
 /* EmployeeDashboard.css */
 
 .employee-dashboard {
